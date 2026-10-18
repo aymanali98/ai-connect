@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ai Connect - Interactive MCP Suite for WordPress</title>
+  <script src="https://www.gstatic.com/antigravity/web/dev/tailwindcss.min.js"></script>
+  <style>
+    /* Custom scrollbar and smooth transitions */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border, #e2e8f0); border-radius: 9999px; }
+    .badge-read { background: rgba(16, 185, 129, 0.12); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.25); }
+    .badge-write { background: rgba(59, 130, 246, 0.12); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.25); }
+    .badge-dangerous { background: rgba(239, 68, 68, 0.12); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.25); }
+    .tab-active { background: var(--primary, #3b82f6); color: var(--primary-foreground, #ffffff); }
+  </style>
+</head>
+<body class="bg-[var(--background,#0f172a)] text-[var(--foreground,#f8fafc)] antialiased min-h-screen p-4 md:p-8 font-sans">
+
+  <!-- Main Container -->
+  <div class="max-w-7xl mx-auto space-y-6">
+
+    <!-- Top Navigation / Header -->
+    <header class="bg-[var(--card,#1e293b)] border border-[var(--border,#334155)] rounded-2xl p-6 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white font-black text-2xl shadow-lg shadow-blue-500/30">
+          ⚡
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="text-2xl font-bold tracking-tight text-[var(--foreground,#ffffff)]">Ai Connect</h1>
+            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-500/20 text-blue-400 border border-blue-500/30">v1.1.0</span>
+            <span class="px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> MCP Active
+            </span>
+          </div>
+          <p class="text-sm text-[var(--muted-foreground,#94a3b8)]">The open standard bridge connecting AI coding agents to WordPress over MCP</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3 w-full md:w-auto">
+        <div class="flex items-center bg-[var(--background,#0f172a)] border border-[var(--border,#334155)] rounded-xl px-3 py-2 text-xs font-mono text-[var(--muted-foreground,#94a3b8)] w-full md:w-auto overflow-hidden">
+          <span class="text-blue-400 mr-2 font-bold">POST</span>
+          <span id="endpointUrl" class="truncate">/wp-json/ai-connect/v1/mcp</span>
+          <button onclick="copyText('https://example.com/wp-json/ai-connect/v1/mcp', this)" class="ml-3 px-2 py-1 rounded bg-[var(--card,#1e293b)] hover:bg-blue-600 hover:text-white transition text-xs font-sans">
+            Copy
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Stat Highlights -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div class="bg-[var(--card,#1e293b)] border border-[var(--border,#334155)] rounded-xl p-4 flex items-center gap-4">
+        <div class="p-3 rounded-lg bg-blue-500/10 text-blue-400 text-xl font-bold">43</div>
+        <div>
+          <div class="text-xs text-[var(--muted-foreground,#94a3b8)]">Registered Tools</div>
+          <div class="text-sm font-semibold">9 Specialized Groups</div>
+        </div>
+      </div>
+      <div class="bg-[var(--card,#1e293b)] border border-[var(--border,#334155)] rounded-xl p-4 flex items-center gap-4">
+        <div class="p-3 rounded-lg bg-emerald-500/10 text-emerald-400 text-xl font-bold">3</div>
+        <div>
+          <div class="text-xs text-[var(--muted-foreground,#94a3b8)]">Risk Tiers</div>
+          <div class="text-sm font-semibold">Read, Write, Dangerous</div>
+        </div>
+      </div>
+      <div class="bg-[var(--card,#1e293b)] border border-[var(--border,#334155)] rounded-xl p-4 flex items-center gap-4">
+        <div class="p-3 rounded-lg bg-purple-500/10 text-purple-400 text-xl font-bold">8+</div>
+        <div>
+          <div class="text-xs text-[var(--muted-foreground,#94a3b8)]">Supported Agents</div>
+          <div class="text-sm font-semibold">Claude, Cursor, Copilot...</div>
+        </div>
+      </div>
+      <div class="bg-[var(--card,#1e293b)] border border-[var(--border,#334155)] rounded-xl p-4 flex items-center gap-4">
+        <div class="p-3 rounded-lg bg-amber-500/10 text-amber-400 text-xl font-bold">100%</div>
+        <div>
+          <div class="text-xs text-[var(--muted-foreground,#94a3b8)]">Self-Hosted & Free</div>
+          <div class="text-sm font-semibold">GPL-2.0 · Zero SaaS</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="flex items-center gap-2 border-b border-[var(--border,#334155)] pb-3 overflow-x-auto">
+      <button onclick="switchTab('tools')" id="tab-btn-tools" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition tab-active">
+        🛠️ 43 Tools Catalog
+      </button>
+      <button onclick="switchTab('clients')" id="tab-btn-clients" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition text-[var(--muted-foreground,#94a3b8)] hover:bg-[var(--card,#1e293b)]">
+        ⚡ AI Client Setup
+      </button>
+      <button onclick="switchTab('security')" id="tab-btn-security" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition text-[var(--muted-foreground,#94a3b8)] hover:bg-[var(--card,#1e293b)]">
+        🛡️ Security Architecture
+      </button>
+      <button onclick="switchTab('design')" id="tab-btn-design" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition text-[var(--muted-foreground,#94a3b8)] hover:bg-[var(--card,#1e293b)]">
+        🎨 Design System Engine
+      </button>
+      <button onclick="switchTab('architecture')" id="tab-btn-architecture" class="tab-btn px-4 py-2 rounded-lg text-sm font-medium transition text-[var(--muted-foreground,#94a3b8)] hover:bg-[var(--card,#1e293b)]">
+        🌐 System Architecture
+      </button>
+    </div>
+
+    <!-- ==================== TAB 1: TOOLS EXPLORER ==================== -->
+    <div id="tab-tools" class="space-y-4">
+      <!-- Search & Filters -->
+      <div class="bg-[var(--card,#1e293b)] border border-[var(--border,#334155)] rounded-xl p-4 flex flex-col md:flex-row gap-4 justify-between items-center">
+        <!-- Search bar -->
+        <div class="relative w-full md:w-96">
+          <input type="text" id="toolSearch" oninput="filterTools()" placeholder="Search tools by name, action or description..." class="w-full bg-[var(--background,#0f172a)] border border-[var(--border,#334155)] rounded-lg pl-9 pr-4 py-2 text-sm text-[var(--foreground,#f8fafc)] focus:outline-none focus:border-blue-500 transition">
+          <span class="absolute left-3 top-2.5 text-xs text-[var(--muted-foreground,#94a3b8)]">🔍</span>
+        </div>
+
+        <!-- Filter Buttons: Categories -->
+        <div class="flex items-center gap-1.5 flex-wrap w-full md:w-auto">
+          <button onclick="filterCategory('all', this)" class="cat-filter active px-2.5 py-1 rounded text-xs font-medium bg-blue-600 text-white transition">All</button>
+          <button onclick="filterCategory('site', this)" class="cat-filter px-2.5 py-1 rounded text-xs font-medium bg-[var(--background,#0f172a)] text-[var(--muted-foreground,#94a3b8)] hover:text-white transition">Site (12)</button>
+          <button onclick="filterCategory('content', this)" class="cat-filter px-2.5 py-1 rounded text-xs font-medium bg-[var(--background,#0f172a)] text-[var(--muted-foreground,#94a3b8)] hover:text-white transition">Content (9)</button>
+          <button onclick="filterCategory('files', this)" class="cat-filter px-2.5 py-1 rounded text-xs font-medium bg-[var(--background,#0f172a)] text-[var(--muted-foreground,#94a3b8)] hover:text-white transition">Files (6)</button>
+          <button onclick="filterCategory('database', this)" class="cat-filter px-2.5 py-1 rounded text-xs font-medium bg-[var(--background,#0f172a)] text-[var(--muted-foreground,#94a3b8)] hover:text-white transition">DB (4)</button>
+          <button onclick="filterCategory('code', this)" class="cat-filter px-2.5 py-1 rounded text-xs font-medium bg-[var(--background,#0f172a)] text-[var(--muted-foreground,#94a3b8)] hover:text-white transition">Code & CLI (2)</button>
+          <button onclick="filterCategory('jobs', this)" class="cat-filter px-2.5 py-1 rounded text-xs font-medium bg-[var(--background,#0f172a)] text-[var(--muted-foreground,#94a3b8)] hover:text-white transition">Jobs (3)</button>
+          <button onclick="filterCategory('design', this)" class="cat-filter px-2.5 py-1 rounded text-xs font-medium bg-[var(--background,#0f172a)] text-[var(--muted-foreground,#94a3b8)] hover:text-white transition">Design (2)</button>
+          <button onclick="filterCategory('meta', this)" class="cat-filter px-2.5 py-1 rounded text-xs font-medium bg-[var(--background,#0f172a)] text-[var(--muted-foreground,#94a3b8)] hover:text-white transition">Meta (3)</button>
+          <button onclick="filterCategory('media', this)" class="cat-filter px-2.5 py-1 rounded text-xs font-medium bg-[var(--background,#0f172a)] text-[var(--muted-foreground,#94a3b8)] hover:text-white transition">Media (2)</button>
+        </div>
+
+        <!-- Filter Buttons: Risk -->
+        <div class="flex items-center gap-1.5">
+          <select id="riskSelect" onchange="filterTools()" class="bg-[var(--background,#0f172a)] border border-[var(--border,#334155)] rounded-lg px-2.5 py-1.5 text-xs text-[var(--foreground,#f8fafc)] focus:outline-none">
+            <option value="all">All Risk Levels</option>
+            <option value="read">Safe (Read Only)</option>
+            <option value="write">Moderate (Write)</option>
+            <option value="dangerous">High (Dangerous)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Tools Grid -->
+      <div id="toolsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Generated by JS -->
+      </div>
+    </div>
+
+    <!-- ==================== TAB 2: CLIENT CONFIGURATIONS ==================== -->
+    <div id="tab-clients" class="hidden space-y-6">
+      <div class="bg-[var(--card,#1e293b)] border border-[var(--border,#334155)] rounded-2xl p-6 shadow-sm">
+        <h2 class="text-xl font-bold mb-2">Connect Your Favorite AI Assistant</h2>
+        <p class="text-sm text-[var(--muted-foreground,#94a3b8)] mb-6">
+          Ai Connect implements standard Streamable HTTP MCP. Choose your agent below to get the instant configuration or automatic prompt.
+        </p>
+
+        <!-- Client Selector Pills -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-2 mb-6">
+          <button onclick="selectClient('cursor')" class="client-pill active p-3 rounded-xl border border-blue-500 bg-blue-500/10 text-center transition flex flex-col items-center gap-1.5">
+            <span class="text-xl">🖱️</span>
+            <span class="text-xs font-bold">Cursor</span>
+          </button>
+          <button onclick="selectClient('claude-code')" class="client-pill p-3 rounded-xl border border-[var(--border,#334155)] bg-[var(--background,#0f172a)] hover:border-blue-500 text-center transition flex flex-col items-center gap-1.5">
+            <span class="text-xl">💻</span>
+            <span class="text-xs font-bold">Claude Code</span>
+          </button>
+          <button onclick="selectClient('vscode')" class="client-pill p-3 rounded-xl border border-[var(--border,#334155)] bg-[var(--background,#0f172a)] hover:border-blue-500 text-center transition flex flex-col items-center gap-1.5">
+            <span class="text-xl">🐙</span>
+            <span class="text-xs font-bold">VS Code / Copilot</span>
+          </button>
+          <button onclick="selectClient('windsurf')" class="client-pill p-3 rounded-xl border border-[var(--border,#334155)] bg-[var(--background,#0f172a)] hover:border-blue-500 text-center transition flex flex-col items-center gap-1.5">
+            <span class="text-xl">🏄</span>
+            <span class="text-xs font-bold">Windsurf</span>
+          </button>
+          <button onclick="selectClient('claude-desktop')" class="client-pill p-3 rounded-xl border border-[var(--border,#334155)] bg-[var(--background,#0f172a)] hover:border-blue-500 text-center transition flex flex-col items-center gap-1.5">
+            <span class="text-xl">🖥️</span>
+            <span class="text-xs font-bold">Claude Desktop</span>
+          </button>
+          <button onclick="selectClient('antigravity')" class="client-pill p-3 rounded-xl border border-[var(--border,#334155)] bg-[var(--background,#0f172a)] hover:border-blue-500 text-center transition flex flex-col items-center gap-1.5">
+            <span class="text-xl">🪐</span>
+            <span class="text-xs font-bold">Antigravity</span>
+          </button>
+          <button onclick="selectClient('chatgpt')" class="client-pill p-3 rounded-xl border border-[var(--border,#334155)] bg-[var(--background,#0f172a)] hover:border-blue-500 text-center transition flex flex-col items-center gap-1.5">
+            <span class="text-xl">💬</span>
+            <span class="text-xs font-bold">ChatGPT (Codex)</span>
+          </button>
+        </div>
+
+        <!-- Client Details View -->
+        <div id="clientDisplay" class="bg-[var(--background,#0f172a)] border border-[var(--border,#334155)] rounded-xl p-6 space-y-4">
+          <!-- Dynamically populated -->
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== TAB 3: SECURITY ==================== -->
+    <div id="tab-security" class="hidden space-y-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <div class="bg-[var(--card,#1e293b)] border border-[var(--border,#334155)] rounded-2xl p-6 space-y-4">
+          <div class="flex items-center gap-3">
+            <div class="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400 text-xl font-bold">🔒</div>
+            <div>
+              <h3 class="text-lg font-bold">Authentication & Token Defense</h3>
+              <p class="text-xs text-[var(--muted-foreground,#94a3b8)]">Cryptographic isolation per connected client</p>
+            </div>
+          </div>
+          <ul class="text-sm space-y-2 text-[var(--muted-foreground,#94a3b8)]">
+            <li class="flex items-start gap-2">
+              <span class="text-emerald-400">✓</span>
+              <span><strong>SHA-256 Hashes Only:</strong> Plaintext tokens (<code class="text-xs bg-[var(--background,#0f172a)] px-1 py-0.5 rounded">swt_...</code>) are shown once and never stored unhashed in MySQL.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-emerald-400">✓</span>
+              <span><strong>Per-IP Rate Limiting:</strong> 100 failed auth attempts in 5 minutes triggers automatic HTTP 429 throttling with <code class="text-xs bg-[var(--background,#0f172a)] px-1 py-0.5 rounded">Retry-After</code>.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-emerald-400">✓</span>
+              <span><strong>Instant Revocation:</strong> Revoke any token individually or terminate all active agent sessions in one click.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-emerald-400">✓</span>
+              <span><strong>Privacy-First Activity Log:</strong> Keeps track of timestamps and tool results without logging arguments or secrets.</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="bg-[var(--card,#1e293b)] border border-[var(--border,#334155)] rounded-2xl p-6 space-y-4">
+          <div class="flex items-center gap-3">
+            <div class="p-2.5 rounded-xl bg-blue-500/10 text-blue-400 text-xl font-bold">🛡️</div>
+            <div>
+              <h3 class="text-lg font-bold">Path Guard & Filesystem Jail</h3>
+              <p class="text-xs text-[var(--muted-foreground,#94a3b8)]">Strict containment within permitted directories</p>
+            </div>
+          </div>
+          <ul class="text-sm space-y-2 text-[var(--muted-foreground,#94a3b8)]">
+            <li class="flex items-start gap-2">
+              <span class="text-blue-400">✓</span>
+              <span><strong>Filesystem Jail:</strong> Confinable to WordPress root (<code class="text-xs bg-[var(--background,#0f172a)] px-1 py-0.5 rounded">ABSPATH</code>) or strictly <code class="text-xs bg-[var(--background,#0f172a)] px-1 py-0.5 rounded">wp-content</code>.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-blue-400">✓</span>
+              <span><strong>Protected Files Shield:</strong> Blocks reading, writing, or deleting critical files like <code class="text-xs bg-[var(--background,#0f172a)] px-1 py-0.5 rounded">wp-config.php</code> or <code class="text-xs bg-[var(--background,#0f172a)] px-1 py-0.5 rounded">.htaccess</code>.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-blue-400">✓</span>
+              <span><strong>Symlink & Traversal Immunity:</strong> Resolves real paths, rejecting directory traversal attempts (<code class="text-xs bg-[var(--background,#0f172a)] px-1 py-0.5 rounded">../</code>) and null bytes.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-blue-400">✓</span>
+              <span><strong>Windows & NTFS Sanitization:</strong> Blocks Windows trailing dots/spaces and alternate data stream injections (<code class="text-xs bg-[var(--background,#0f172a)] px-1 py-0.5 rounded">::$DATA</code>).</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="bg-[var(--card,#1e293b)] border border-[var(--border,#334155)] rounded-2xl p-6 space-y-4">
+          <div class="flex items-center gap-3">
+            <div class="p-2.5 rounded-xl bg-amber-500/10 text-amber-400 text-xl font-bold">⚡</div>
+            <div>
+              <h3 class="text-lg font-bold">Crash-Safe PHP Sandbox</h3>
+              <p class="text-xs text-[var(--muted-foreground,#94a3b8)]">Isolated execution with automated recovery</p>
+            </div>
+          </div>
+          <ul class="text-sm space-y-2 text-[var(--muted-foreground,#94a3b8)]">
+            <li class="flex items-start gap-2">
+              <span class="text-amber-400">✓</span>
+              <span><strong>Sandbox Isolation:</strong> Agent-written PHP is restricted by default to <code class="text-xs bg-[var(--background,#0f172a)] px-1 py-0.5 rounded">wp-content/sitewright-sandbox/</code>.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-amber-400">✓</span>
+              <span><strong>Automatic Safe Mode:</strong> If agent code causes a fatal PHP error, sandbox loader pauses execution so your admin remains accessible.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-amber-400">✓</span>
+              <span><strong>Error Capture:</strong> Exact PHP error stack trace and offending file name are logged directly in the Diagnostics panel.</span>
+            </li>
+          </ul>
+        </div>
+
+        <div class="bg-[var(--card,#1e293b)] border border-[var(--border,#334155)] rounded-2xl p-6 space-y-4">
+          <div class="flex items-center gap-3">
+            <div class="p-2.5 rounded-xl bg-red-500/10 text-red-400 text-xl font-bold">🗄️</div>
+            <div>
+              <h3 class="text-lg font-bold">SQL Guard & Database Shield</h3>
+              <p class="text-xs text-[var(--muted-foreground,#94a3b8)]">Safe querying with hard limits</p>
+            </div>
+          </div>
+          <ul class="text-sm space-y-2 text-[var(--muted-foreground,#94a3b8)]">
+            <li class="flex items-start gap-2">
+              <span class="text-red-400">✓</span>
+              <span><strong>Single-Statement Enforcement:</strong> Multiple queries separated by semicolons are strictly rejected.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-red-400">✓</span>
+              <span><strong>System Schema Refusal:</strong> Queries attempting to query <code class="text-xs bg-[var(--background,#0f172a)] px-1 py-0.5 rounded">mysql</code>, <code class="text-xs bg-[var(--background,#0f172a)] px-1 py-0.5 rounded">information_schema</code>, or <code class="text-xs bg-[var(--background,#0f172a)] px-1 py-0.5 rounded">performance_schema</code> are blocked.</span>
+            </li>
+            <li class="flex items-start gap-2">
+              <span class="text-red-400">✓</span>
+              <span><strong>Server File I/O Block:</strong> Blocks dangerous MySQL file queries (<code class="text-xs bg-[var(--background,#0f172a)] px-1 py-0.5 rounded">INTO OUTFILE</code>, <code class="text-xs bg-[var(--background,#0f172a)] px-1 py-0.5 rounded">LOAD_FILE()</code>, <code class="text-xs bg-[var(--background,#0f172a)] px-1 py-0.5 rounded">LOAD DATA</code>).</span>
+            </li>
+          </ul>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ==================== TAB 4: DESIGN SYSTEM ==================== -->
+    <div id="tab-design" class="hidden space-y-6">
+      <div class="bg-[var(--card,#1e293b)] border border-[var(--border,#334155)] rounded-2xl p-6 space-y-6">
+        <div>
+          <h2 class="text-xl font-bold mb-1">Design System Integration</h2>
+          <p class="text-sm text-[var(--muted-foreground,#94a3b8)]">
+            Ai Connect inspects your active theme, block styles, and <code class="text-xs bg-[var(--background,#0f172a)] px-1.5 py-0.5 rounded">theme.json</code> to provide the AI model with real design tokens.
+          </p>
+        </div>
+
+        <!-- Sample Swatches -->
+        <div class="space-y-3">
+          <h3 class="text-sm font-semibold uppercase tracking-wider text-[var(--muted-foreground,#94a3b8)]">Extracted Theme Palette</h3>
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+            <div class="bg-[var(--background,#0f172a)] border border-[var(--border,#334155)] rounded-xl p-3 space-y-2">
+              <div class="h-10 rounded-lg bg-blue-600 shadow-sm"></div>
+              <div class="text-xs font-mono">#2563eb</div>
+              <div class="text-xs text-[var(--muted-foreground,#94a3b8)]">Primary Accent</div>
+            </div>
+            <div class="bg-[var(--background,#0f172a)] border border-[var(--border,#334155)] rounded-xl p-3 space-y-2">
+              <div class="h-10 rounded-lg bg-indigo-500 shadow-sm"></div>
+              <div class="text-xs font-mono">#6366f1</div>
+              <div class="text-xs text-[var(--muted-foreground,#94a3b8)]">Secondary</div>
+            </div>
+            <div class="bg-[var(--background,#0f172a)] border border-[var(--border,#334155)] rounded-xl p-3 space-y-2">
+              <div class="h-10 rounded-lg bg-emerald-500 shadow-sm"></div>
+              <div class="text-xs font-mono">#10b981</div>
+              <div class="text-xs text-[var(--muted-foreground,#94a3b8)]">Success State</div>
+            </div>
+            <div class="bg-[var(--background,#0f172a)] border border-[var(--border,#334155)] rounded-xl p-3 space-y-2">
+              <div class="h-10 rounded-lg bg-amber-500 shadow-sm"></div>
+              <div class="text-xs font-mono">#f59e0b</div>
+              <div class="text-xs text-[var(--muted-foreground,#94a3b8)]">Warning State</div>
+            </div>
+            <div class="bg-[var(--background,#0f172a)] border border-[var(--border,#334155)] rounded-xl p-3 space-y-2">
+              <div class="h-10 rounded-lg bg-slate-800 shadow-sm"></div>
+              <div class="text-xs font-mono">#1e293b</div>
+              <div class="text-xs text-[var(--muted-foreground,#94a3b8)]">Surface Card</div>
+            </div>
+            <div class="bg-[var(--background,#0f172a)] border border-[var(--border,#334155)] rounded-xl p-3 space-y-2">
+              <div class="h-10 rounded-lg bg-slate-950 shadow-sm"></div>
+              <div class="text-xs font-mono">#0f172a</div>
+              <div class="text-xs text-[var(--muted-foreground,#94a3b8)]">Dark Background</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Typography & Radii Specs -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="bg-[var(--background,#0f172a)] border border-[var(--border,#334155)] rounded-xl p-4 space-y-3">
+            <h4 class="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground,#94a3b8)]">Typography Scale</h4>
+            <div class="space-y-2 text-sm">
+              <div class="flex justify-between border-b border-[var(--border,#334155)] pb-1">
+                <span>Display Heading</span>
+                <span class="font-mono text-xs text-blue-400">2.25rem (36px) / 700</span>
+              </div>
+              <div class="flex justify-between border-b border-[var(--border,#334155)] pb-1">
+                <span>Card Title</span>
+                <span class="font-mono text-xs text-blue-400">1.25rem (20px) / 600</span>
+              </div>
+              <div class="flex justify-between border-b border-[var(--border,#334155)] pb-1">
+                <span>Body Text</span>
+                <span class="font-mono text-xs text-blue-400">0.875rem (14px) / 400</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-[var(--background,#0f172a)] border border-[var(--border,#334155)] rounded-xl p-4 space-y-3">
+            <h4 class="text-xs font-semibold uppercase tracking-wider text-[var(--muted-foreground,#94a3b8)]">Page Builder Adaptation</h4>
+            <p class="text-xs text-[var(--muted-foreground,#94a3b8)]">
+              When an agent calls <code class="text-xs text-blue-400">design_get</code>, Ai Connect detects whether the site uses Block Themes, Elementor, WooCommerce, or Astra, and injects customized UI instructions so generated components match natively.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================== TAB 5: ARCHITECTURE ==================== -->
+    <div id="tab-architecture" class="hidden space-y-6">
+      <div class="bg-[var(--card,#1e293b)] border border-[var(--border,#334155)] rounded-2xl p-6 space-y-6">
+        <div>
+          <h2 class="text-xl font-bold mb-1">Architecture & Data Flow</h2>
+          <p class="text-sm text-[var(--muted-foreground,#94a3b8)]">
+            How MCP clients communicate with WordPress securely over Streamable HTTP.
+          </p>
+        </div>
+
+        <!-- Workflow Diagram Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 relative">
+          <!-- Step 1 -->
+          <div class="bg-[var(--background,#0f172a)] border border-[var(--border,#334155)] rounded-xl p-4 space-y-2">
+            <div class="w-8 h-8 rounded-lg bg-blue-500/20 text-blue-400 font-bold flex items-center justify-center text-sm">1</div>
+            <div class="font-semibold text-sm">AI Coding Agent</div>
+            <p class="text-xs text-[var(--muted-foreground,#94a3b8)]">
+              Claude Code, Cursor, Windsurf, or Antigravity executes an instruction and decides to call an MCP tool.
+            </p>
+          </div>
+
+          <!-- Step 2 -->
+          <div class="bg-[var(--background,#0f172a)] border border-[var(--border,#334155)] rounded-xl p-4 space-y-2">
+            <div class="w-8 h-8 rounded-lg bg-purple-500/20 text-purple-400 font-bold flex items-center justify-center text-sm">2</div>
+            <div class="font-semibold text-sm">Streamable HTTP</div>
+            <p class="text-xs text-[var(--muted-foreground,#94a3b8)]">
+              Standard JSON-RPC 2.0 request sent to <code class="text-xs text-blue-400">/ai-connect/v1/mcp</code> with Bearer Token in Authorization header.
+            </p>
+          </div>
+
+          <!-- Step 3 -->
+          <div class="bg-[var(--background,#0f172a)] border border-[var(--border,#334155)] rounded-xl p-4 space-y-2">
+            <div class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 font-bold flex items-center justify-center text-sm">3</div>
+            <div class="font-semibold text-sm">Security Perimeter</div>
+            <p class="text-xs text-[var(--muted-foreground,#94a3b8)]">
+              Verified by SHA-256 token validator, IP rate limiter, Master switch, Path Guard, and SQL Guard.
+            </p>
+          </div>
+
+          <!-- Step 4 -->
+          <div class="bg-[var(--background,#0f172a)] border border-[var(--border,#334155)] rounded-xl p-4 space-y-2">
+            <div class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-400 font-bold flex items-center justify-center text-sm">4</div>
+            <div class="font-semibold text-sm">WordPress Execution</div>
+            <p class="text-xs text-[var(--muted-foreground,#94a3b8)]">
+              Direct access to $wpdb, filesystem, options, content, or queued into async background jobs engine.
+            </p>
+          </div>
+        </div>
+
+        <!-- Protocol Compatibility Details -->
+        <div class="bg-[var(--background,#0f172a)] border border-[var(--border,#334155)] rounded-xl p-4 text-xs space-y-2 font-mono">
+          <div class="text-sm font-sans font-semibold text-[var(--foreground,#f8fafc)]">Supported MCP Protocol Versions</div>
+          <div class="text-emerald-400">✓ 2025-06-18 (Latest Streamable HTTP specification)</div>
+          <div class="text-emerald-400">✓ 2025-03-26 (Enhanced session metadata & capabilities)</div>
+          <div class="text-emerald-400">✓ 2024-11-05 (Original Model Context Protocol specification)</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Interactive Logic -->
+  <script>
+    // All 43 tools database
+    const toolsData = [
+      // Meta
+      { name: "agent_context", group: "meta", risk: "read", title: "Agent context", desc: "Orientation for this WordPress site: environment summary, active modes, server instructions, and design-system tokens. Call this first." },
+      { name: "discover_abilities", group: "meta", risk: "read", title: "Discover abilities", desc: "List abilities registered through the WordPress Abilities API (WordPress 6.9+), so you can call them with run_ability." },
+      { name: "run_ability", group: "meta", risk: "write", title: "Run ability", desc: "Execute a registered WordPress ability by name with an input payload object." },
+
+      // Site
+      { name: "site_info", group: "site", risk: "read", title: "Site info", desc: "Detailed environment report: WP/PHP versions, active theme, plugin counts, detected builders (Elementor/WooCommerce), debug flags, PHP limits." },
+      { name: "list_plugins", group: "site", risk: "read", title: "List plugins", desc: "Every installed plugin with version, active state, and update availability flags." },
+      { name: "install_plugin", group: "site", risk: "dangerous", title: "Install plugin", desc: "Install a plugin from WordPress.org by slug or from a direct ZIP URL, optionally activating it." },
+      { name: "update_plugin", group: "site", risk: "dangerous", title: "Update plugin", desc: "Update one installed plugin to its latest available release." },
+      { name: "activate_plugin", group: "site", risk: "write", title: "Activate plugin", desc: "Activate an installed plugin by its file key." },
+      { name: "deactivate_plugin", group: "site", risk: "write", title: "Deactivate plugin", desc: "Deactivate an active plugin cleanly." },
+      { name: "list_themes", group: "site", risk: "read", title: "List themes", desc: "Installed themes with version, parent theme, and which one is active." },
+      { name: "list_users", group: "site", risk: "read", title: "List users", desc: "WordPress users with IDs, login names, display names, and roles." },
+      { name: "diagnostics", group: "site", risk: "read", title: "Diagnostics", desc: "Automated environment audit: versions, extensions, HTTPS, REST reachability, tables, sandbox status, WP-CLI, limits, cron." },
+      { name: "get_option", group: "site", risk: "read", title: "Get option", desc: "Read any wp_options value, including serialized arrays." },
+      { name: "update_option", group: "site", risk: "write", title: "Update option", desc: "Write a wp_options value with safety protection against core critical keys." },
+      { name: "clear_cache", group: "site", risk: "write", title: "Clear cache", desc: "Flush WordPress object cache and detected page caches (LiteSpeed, WP Rocket, W3TC, SiteGround...)." },
+
+      // Content
+      { name: "get_posts", group: "content", risk: "read", title: "Get posts", desc: "Query posts, pages, and custom post types with status, category, taxonomy, search, and pagination." },
+      { name: "get_post", group: "content", risk: "read", title: "Get post", desc: "Retrieve a single post with full content, excerpt, post meta, terms, and author details." },
+      { name: "create_post", group: "content", risk: "write", title: "Create post", desc: "Publish or draft posts, pages, or custom post types with metadata and taxonomy terms." },
+      { name: "update_post", group: "content", risk: "write", title: "Update post", desc: "Update fields or post meta of an existing post." },
+      { name: "delete_post", group: "content", risk: "write", title: "Delete post", desc: "Move a post to the trash, or delete permanently with force=true." },
+      { name: "list_terms", group: "content", risk: "read", title: "List terms", desc: "List taxonomy terms (categories, tags, custom taxonomies) with hierarchy and count." },
+      { name: "create_term", group: "content", risk: "write", title: "Create term", desc: "Create a taxonomy term idempotently without failing if it already exists." },
+      { name: "list_comments", group: "content", risk: "read", title: "List comments", desc: "List comments with status and post filters and pagination." },
+      { name: "moderate_comment", group: "content", risk: "write", title: "Moderate comment", desc: "Approve, hold, spam, unspam, trash, or permanently delete one comment." },
+
+      // Media
+      { name: "list_media", group: "media", risk: "read", title: "List media", desc: "List media library items with attachment URLs, MIME types, sizes, and dimensions." },
+      { name: "upload_media", group: "media", risk: "write", title: "Upload media", desc: "Add a file to the media library from a URL or base64 data (up to 10 MB)." },
+
+      // Files
+      { name: "list_directory", group: "files", risk: "read", title: "List directory", desc: "List files and directories under WordPress root or wp-content with depth limits." },
+      { name: "read_file", group: "files", risk: "read", title: "Read file", desc: "Read file content under jail root with byte offsets; binaries returned as base64." },
+      { name: "write_file", group: "files", risk: "write", title: "Write file", desc: "Write full UTF-8 text content to a file (PHP confined to sandbox)." },
+      { name: "edit_file", group: "files", risk: "write", title: "Edit file", desc: "Replace an exact text chunk within a file with precision verification." },
+      { name: "delete_file", group: "files", risk: "write", title: "Delete file", desc: "Delete a single file or empty folder (protects core WordPress folders)." },
+      { name: "rename_file", group: "files", risk: "write", title: "Rename file", desc: "Rename or move a file (supports .php.disabled trick to neutralize scripts)." },
+
+      // Database
+      { name: "db_query", group: "database", risk: "read", title: "Database query", desc: "Execute read-only SQL queries (SELECT, SHOW, DESCRIBE) with auto LIMIT 200 and {prefix} replacement." },
+      { name: "db_execute", group: "database", risk: "dangerous", title: "Database execute", desc: "Run write or DDL SQL (INSERT, UPDATE, DELETE, CREATE, ALTER). Refuses multi-query or system schemas." },
+      { name: "db_tables", group: "database", risk: "read", title: "Database tables", desc: "List all database tables with storage engine, row estimates, and data size." },
+      { name: "db_describe", group: "database", risk: "read", title: "Describe table", desc: "Show detailed columns, keys, and indexes of one table." },
+
+      // Code & CLI
+      { name: "run_php", group: "code", risk: "dangerous", title: "Run PHP", desc: "Execute a PHP snippet inside live WordPress with full runtime ($wpdb, plugins, core)." },
+      { name: "run_wp_cli", group: "code", risk: "dangerous", title: "Run WP-CLI", desc: "Execute a real WP-CLI command via WP_CLI::runcommand or shell fallback." },
+
+      // Design
+      { name: "design_get", group: "design", risk: "read", title: "Get design system", desc: "Site design system: palette, typography scale, spacing, radii, component guidelines, and page-builder hints." },
+      { name: "design_update", group: "design", risk: "write", title: "Update design system", desc: "Merge changes into design system or re-seed from theme.json / active theme CSS." },
+
+      // Jobs
+      { name: "job_start", group: "jobs", risk: "dangerous", title: "Start background job", desc: "Queue a long-running tool call (plugin install, WP-CLI, heavy PHP) and return job_id immediately to prevent timeouts." },
+      { name: "job_status", group: "jobs", risk: "read", title: "Job status", desc: "Check execution status of a background job; returns result payload when completed." },
+      { name: "job_cancel", group: "jobs", risk: "write", title: "Cancel background job", desc: "Cancel a queued background job before it runs." }
+    ];
+
+    let currentCategory = 'all';
+
+    function renderTools(list) {
+      const container = document.getElementById('toolsGrid');
+      if (list.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full py-12 text-center text-[var(--muted-foreground,#94a3b8)]">
+            <p class="text-lg">No tools found matching your filters.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = list.map(t => {
+        const riskClass = t.risk === 'read' ? 'badge-read' : (t.risk === 'write' ? 'badge-write' : 'badge-dangerous');
+        const riskIcon = t.risk === 'read' ? '🟢 Safe Read' : (t.risk === 'write' ? '🔵 Write' : '🔴 Dangerous');
+        return `
+          <div class="bg-[var(--card,#1e293b)] border border-[var(--border,#334155)] rounded-xl p-4 flex flex-col justify-between hover:border-blue-500/50 transition shadow-sm space-y-3">
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <span class="font-mono text-xs font-bold text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded">${t.name}</span>
+                <span class="text-xs px-2 py-0.5 rounded-full font-medium ${riskClass}">${riskIcon}</span>
+              </div>
+              <h4 class="font-semibold text-sm text-[var(--foreground,#f8fafc)]">${t.title}</h4>
+              <p class="text-xs text-[var(--muted-foreground,#94a3b8)] mt-1 line-clamp-3">${t.desc}</p>
+            </div>
+            <div class="pt-2 border-t border-[var(--border,#334155)] flex justify-between items-center text-xs text-[var(--muted-foreground,#94a3b8)]">
+              <span class="capitalize">Category: <strong class="text-[var(--foreground,#f8fafc)]">${t.group}</strong></span>
+              <button onclick="copyToolCall('${t.name}', this)" class="text-xs text-blue-400 hover:text-blue-300 font-medium">Copy Call</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function filterTools() {
+      const q = document.getElementById('toolSearch').value.toLowerCase();
+      const risk = document.getElementById('riskSelect').value;
+
+      const filtered = toolsData.filter(t => {
+        const matchesQuery = t.name.toLowerCase().includes(q) || t.title.toLowerCase().includes(q) || t.desc.toLowerCase().includes(q);
+        const matchesCategory = currentCategory === 'all' || t.group === currentCategory;
+        const matchesRisk = risk === 'all' || t.risk === risk;
+        return matchesQuery && matchesCategory && matchesRisk;
+      });
+
+      renderTools(filtered);
+    }
+
+    function filterCategory(cat, btn) {
+      currentCategory = cat;
+      document.querySelectorAll('.cat-filter').forEach(b => {
+        b.classList.remove('bg-blue-600', 'text-white');
+        b.classList.add('bg-[var(--background,#0f172a)]', 'text-[var(--muted-foreground,#94a3b8)]');
+      });
+      btn.classList.remove('bg-[var(--background,#0f172a)]', 'text-[var(--muted-foreground,#94a3b8)]');
+      btn.classList.add('bg-blue-600', 'text-white');
+      filterTools();
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll('[id^="tab-"]').forEach(el => {
+        if (el.id === 'tab-' + tab) {
+          el.classList.remove('hidden');
+        } else if (!el.id.includes('btn')) {
+          el.classList.add('hidden');
+        }
+      });
+
+      document.querySelectorAll('.tab-btn').forEach(b => {
+        b.classList.remove('tab-active');
+        b.classList.add('text-[var(--muted-foreground,#94a3b8)]');
+      });
+      const activeBtn = document.getElementById('tab-btn-' + tab);
+      if (activeBtn) {
+        activeBtn.classList.add('tab-active');
+        activeBtn.classList.remove('text-[var(--muted-foreground,#94a3b8)]');
+      }
+    }
+
+    // Client setup details
+    const clientsData = {
+      cursor: {
+        title: "Cursor IDE",
+        location: "~/.cursor/mcp.json",
+        type: "JSON Configuration",
+        code: `{\n  "mcpServers": {\n    "ai-connect": {\n      "url": "https://example.com/wp-json/ai-connect/v1/mcp",\n      "headers": {\n        "Authorization": "Bearer swt_YOUR_TOKEN_HERE"\n      }\n    }\n  }\n}`,
+        instructions: "Open Cursor settings or edit ~/.cursor/mcp.json directly, then reload Cursor window."
+      },
+      "claude-code": {
+        title: "Claude Code CLI",
+        location: "Terminal Command",
+        type: "CLI Command",
+        code: `claude mcp add --transport http ai-connect https://example.com/wp-json/ai-connect/v1/mcp --header "Authorization: Bearer swt_YOUR_TOKEN_HERE"`,
+        instructions: "Run this command directly in your terminal. Claude Code will configure its MCP client automatically."
+      },
+      vscode: {
+        title: "VS Code / GitHub Copilot",
+        location: ".vscode/mcp.json or User MCP Configuration",
+        type: "JSON Configuration",
+        code: `{\n  "mcpServers": {\n    "ai-connect": {\n      "type": "http",\n      "url": "https://example.com/wp-json/ai-connect/v1/mcp",\n      "headers": {\n        "Authorization": "Bearer swt_YOUR_TOKEN_HERE"\n      }\n    }\n  }\n}`,
+        instructions: "Add to workspace .vscode/mcp.json or use 'MCP: Open User Configuration' in Command Palette."
+      },
+      windsurf: {
+        title: "Windsurf Editor",
+        location: "~/.codeium/windsurf/mcp_config.json",
+        type: "JSON Configuration",
+        code: `{\n  "mcpServers": {\n    "ai-connect": {\n      "serverUrl": "https://example.com/wp-json/ai-connect/v1/mcp",\n      "headers": {\n        "Authorization": "Bearer swt_YOUR_TOKEN_HERE"\n      }\n    }\n  }\n}`,
+        instructions: "Paste into ~/.codeium/windsurf/mcp_config.json or Windsurf MCP Settings panel."
+      },
+      "claude-desktop": {
+        title: "Claude Desktop",
+        location: "claude_desktop_config.json (via npx mcp-remote)",
+        type: "JSON Bridge",
+        code: `{\n  "mcpServers": {\n    "ai-connect": {\n      "command": "npx",\n      "args": [\n        "-y",\n        "mcp-remote",\n        "https://example.com/wp-json/ai-connect/v1/mcp",\n        "--header",\n        "Authorization: Bearer swt_YOUR_TOKEN_HERE"\n      ]\n    }\n  }\n}`,
+        instructions: "Since desktop clients speak stdio, this uses the official mcp-remote bridge to talk to the HTTP endpoint."
+      },
+      antigravity: {
+        title: "Google Antigravity",
+        location: "mcp_config.json (via npx mcp-remote)",
+        type: "JSON Bridge",
+        code: `{\n  "mcpServers": {\n    "ai-connect": {\n      "command": "npx",\n      "args": [\n        "-y",\n        "mcp-remote",\n        "https://example.com/wp-json/ai-connect/v1/mcp",\n        "--header",\n        "Authorization: Bearer swt_YOUR_TOKEN_HERE"\n      ]\n    }\n  }\n}`,
+        instructions: "Add to your Antigravity mcp_config.json or configure via tool settings."
+      },
+      chatgpt: {
+        title: "ChatGPT Desktop (Codex)",
+        location: "~/.codex/config.toml",
+        type: "TOML Configuration",
+        code: `[mcp_servers.ai-connect]\nurl = "https://example.com/wp-json/ai-connect/v1/mcp"\nhttp_headers = { Authorization = "Bearer swt_YOUR_TOKEN_HERE" }`,
+        instructions: "Append this block to ~/.codex/config.toml (or %USERPROFILE%\\.codex\\config.toml on Windows) and restart ChatGPT Desktop."
+      }
+    };
+
+    function selectClient(id) {
+      document.querySelectorAll('.client-pill').forEach(b => {
+        b.classList.remove('border-blue-500', 'bg-blue-500/10');
+        b.classList.add('border-[var(--border,#334155)]', 'bg-[var(--background,#0f172a)]');
+      });
+      event.currentTarget.classList.add('border-blue-500', 'bg-blue-500/10');
+      event.currentTarget.classList.remove('border-[var(--border,#334155)]', 'bg-[var(--background,#0f172a)]');
+
+      const client = clientsData[id];
+      const display = document.getElementById('clientDisplay');
+      display.innerHTML = `
+        <div class="flex items-center justify-between">
+          <div>
+            <h3 class="font-bold text-base text-[var(--foreground,#f8fafc)]">${client.title}</h3>
+            <span class="text-xs text-[var(--muted-foreground,#94a3b8)]">Location: <code class="bg-[var(--card,#1e293b)] px-1.5 py-0.5 rounded text-blue-400 font-mono">${client.location}</code></span>
+          </div>
+          <button onclick="copyText(document.getElementById('codeBlock').innerText, this)" class="px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium text-xs transition shadow-sm">
+            Copy Configuration
+          </button>
+        </div>
+        <pre class="bg-[var(--card,#1e293b)] p-4 rounded-lg font-mono text-xs overflow-x-auto border border-[var(--border,#334155)] text-blue-300"><code id="codeBlock">${client.code}</code></pre>
+        <p class="text-xs text-[var(--muted-foreground,#94a3b8)]">${client.instructions}</p>
+      `;
+    }
+
+    function copyText(text, btn) {
+      navigator.clipboard.writeText(text);
+      const original = btn.innerText;
+      btn.innerText = "✓ Copied!";
+      btn.classList.add("bg-emerald-600");
+      setTimeout(() => {
+        btn.innerText = original;
+        btn.classList.remove("bg-emerald-600");
+      }, 1800);
+    }
+
+    function copyToolCall(toolName, btn) {
+      const snippet = `{"jsonrpc": "2.0", "method": "tools/call", "params": {"name": "${toolName}", "arguments": {}}, "id": 1}`;
+      copyText(snippet, btn);
+    }
+
+    // Initial render
+    renderTools(toolsData);
+    selectClient('cursor');
+  </script>
+</body>
+</html>
