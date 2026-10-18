@@ -131,31 +131,39 @@
 			});
 		});
 
-		each(document.querySelectorAll('[data-sitw-remove-row]'), function (button) {
-			button.addEventListener('click', function () {
-				var row = button.closest('tr');
-				if (!row) {
-					return;
+		document.addEventListener('click', function (e) {
+			var button = e.target && e.target.closest ? e.target.closest('[data-sitw-remove-row]') : null;
+			if (!button) {
+				return;
+			}
+			var row = button.closest('tr');
+			if (!row) {
+				return;
+			}
+			var tbody = row.parentNode;
+			if (tbody && tbody.querySelectorAll('tr').length > 1) {
+				tbody.removeChild(row);
+			} else {
+				each(row.querySelectorAll('input, textarea'), function (input) {
+					input.value = '';
+				});
+				var swatch = row.querySelector('.sitw-swatch');
+				if (swatch) {
+					swatch.style.background = '';
 				}
-				var tbody = row.parentNode;
-				if (tbody.querySelectorAll('tr').length > 1) {
-					tbody.removeChild(row);
-				} else {
-					each(row.querySelectorAll('input, textarea'), function (input) {
-						input.value = '';
-					});
-				}
-			});
+			}
 		});
 
-		each(document.querySelectorAll('.sitw-color-input'), function (input) {
-			input.addEventListener('input', function () {
-				var row = input.closest('tr');
-				var swatch = row ? row.querySelector('.sitw-swatch') : null;
-				if (swatch) {
-					swatch.style.background = input.value;
-				}
-			});
+		document.addEventListener('input', function (e) {
+			if (!e.target || !e.target.classList || !e.target.classList.contains('sitw-color-input')) {
+				return;
+			}
+			var input = e.target;
+			var row = input.closest('tr');
+			var swatch = row ? row.querySelector('.sitw-swatch') : null;
+			if (swatch) {
+				swatch.style.background = input.value;
+			}
 		});
 	}
 

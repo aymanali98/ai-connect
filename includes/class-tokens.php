@@ -244,7 +244,7 @@ final class Tokens {
 		global $wpdb;
 		$table = DB::tokens_table();
 		$count = $wpdb->query(
-			$wpdb->prepare( "UPDATE {$table} SET revoked_at = %s WHERE revoked_at IS NULL", Util::now() )
+			$wpdb->prepare( "UPDATE {$table} SET revoked_at = %s WHERE revoked_at IS NULL OR revoked_at = '0000-00-00 00:00:00' OR revoked_at = ''", Util::now() )
 		);
 		delete_transient( self::LAST_TOKEN_TRANSIENT );
 		return max( 0, (int) $count );

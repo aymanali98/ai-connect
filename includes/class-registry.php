@@ -235,7 +235,10 @@ final class Registry {
 		if ( ! is_array( $spec ) ) {
 			return array( true, $value );
 		}
-		$type = isset( $spec['type'] ) ? (string) $spec['type'] : 'string';
+		if ( ! isset( $spec['type'] ) ) {
+			return array( true, $value );
+		}
+		$type = (string) $spec['type'];
 
 		switch ( $type ) {
 			case 'string':

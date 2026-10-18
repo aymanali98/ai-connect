@@ -25,8 +25,9 @@ $sitw_labels = array(
 	'database' => __( 'Database', 'ai-connect' ),
 	'code'     => __( 'Code', 'ai-connect' ),
 	'design'   => __( 'Design', 'ai-connect' ),
+	'jobs'     => __( 'Background Jobs', 'ai-connect' ),
 );
-$sitw_order = array( 'meta', 'site', 'content', 'media', 'files', 'database', 'code', 'design' );
+$sitw_order = array( 'meta', 'site', 'content', 'media', 'files', 'database', 'code', 'design', 'jobs' );
 
 Admin::page_open(
 	__( 'Tools', 'ai-connect' ),

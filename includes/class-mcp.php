@@ -161,9 +161,6 @@ final class Mcp {
 			}
 		} catch ( \Throwable $error ) {
 			Log::add( $method, 'read', 'error', $error->getMessage(), 0, $token['user_id'], $token['token_prefix'] );
-			if ( self::is_wp_error( $error ) ) {
-				return self::rpc_error( $id, -32603, $error->getMessage() );
-			}
 			return self::rpc_error( $id, -32603, 'Internal error: ' . $error->getMessage() );
 		}
 	}
@@ -509,15 +506,5 @@ final class Mcp {
 			return Util::truncate( 'wp-cli: ' . implode( ' ', array_map( 'strval', array_slice( $args['args'], 0, 4 ) ) ), 200 );
 		}
 		return '';
-	}
-
-	/**
-	 * WP_Error check without a hard dependency at parse time.
-	 *
-	 * @param \Throwable $error Error.
-	 * @return bool
-	 */
-	private static function is_wp_error( $error ) {
-		return $error instanceof \WP_Error;
 	}
 }

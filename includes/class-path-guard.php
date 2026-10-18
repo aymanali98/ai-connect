@@ -193,14 +193,17 @@ final class Path_Guard {
 	 */
 	public static function is_php_path( $path ) {
 		$name = strtolower( basename( Util::norm_path( $path ) ) );
-		if ( false !== strpos( $name, '.php' ) ) {
-			// Plain text/data siblings such as notes.md are fine; anything whose
-			// name contains ".php" anywhere is treated as PHP.
+		// Neutralized scripts (.php.disabled) do not execute as PHP.
+		if ( substr( $name, -9 ) === '.disabled' ) {
+			return false;
+		}
+		$ext = pathinfo( $name, PATHINFO_EXTENSION );
+		if ( in_array( $ext, array( 'php', 'phtml', 'php3', 'php4', 'php5', 'php7', 'phps' ), true ) ) {
 			return true;
 		}
-		if ( 'php' === pathinfo( $name, PATHINFO_EXTENSION ) ) {
+		if ( false !== strpos( $name, '.php.' ) ) {
 			return true;
 		}
-		return in_array( pathinfo( $name, PATHINFO_EXTENSION ), array( 'phtml', 'php3', 'php4', 'php5', 'php7', 'phps' ), true );
+		return false;
 	}
 }

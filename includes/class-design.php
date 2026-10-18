@@ -277,15 +277,18 @@ final class Design {
 			}
 		}
 
-		if ( ! $found ) {
+		$source = 'defaults';
+		if ( $found ) {
+			$source = 'theme_json';
+		} else {
 			$css = self::seed_from_css();
 			if ( null !== $css ) {
-				$doc   = array_merge( $doc, $css );
-				$found = true;
+				$doc    = array_merge( $doc, $css );
+				$source = 'theme_css';
 			}
 		}
 
-		$doc['source'] = $found ? 'theme_json' : 'defaults';
+		$doc['source'] = $source;
 		if ( function_exists( 'wp_get_theme' ) ) {
 			$theme         = wp_get_theme();
 			$doc['name']   = $theme->get( 'Name' ) ? $theme->get( 'Name' ) . ' Design' : $doc['name'];

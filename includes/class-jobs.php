@@ -311,7 +311,7 @@ final class Jobs {
 
 		$table = DB::jobs_table();
 		$row   = $wpdb->get_row(
-			$wpdb->prepare( "SELECT * FROM {$table} WHERE status = 'queued' ORDER BY id ASC LIMIT 1" ),
+			"SELECT * FROM {$table} WHERE status = 'queued' ORDER BY id ASC LIMIT 1",
 			ARRAY_A
 		);
 		if ( ! is_array( $row ) ) {

@@ -47,7 +47,11 @@ final class Log {
 			array( '%s', '%d', '%s', '%s', '%s', '%s', '%s', '%d' )
 		);
 
-		self::prune();
+		// Prune periodically (1-in-100 probability) to avoid DB overhead on every call.
+		// Scheduled daily cron (ai_connect_daily) also handles systematic pruning.
+		if ( function_exists( 'wp_rand' ) ? 1 === wp_rand( 1, 100 ) : 1 === mt_rand( 1, 100 ) ) {
+			self::prune();
+		}
 	}
 
 	/**

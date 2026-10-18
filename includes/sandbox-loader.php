@@ -98,6 +98,7 @@ register_shutdown_function(
 foreach ( $ai_connect_sandbox_files as $ai_connect_sandbox_file ) {
 	$ai_connect_current_file = $ai_connect_sandbox_file;
 	$ai_connect_level        = ob_get_level();
+	$ai_connect_has_crashed  = false;
 	ob_start();
 
 	try {
@@ -112,12 +113,17 @@ foreach ( $ai_connect_sandbox_files as $ai_connect_sandbox_file ) {
 			'time'         => gmdate( 'c' ),
 		);
 		@file_put_contents( $ai_connect_crashed_file, wp_json_encode( $info ), LOCK_EX ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+		$ai_connect_has_crashed = true;
 	}
 
 	// Throw away anything the file printed while loading; a sandbox loader must
 	// not leak output into admin pages, REST/MCP responses, or the front end.
 	while ( ob_get_level() > $ai_connect_level ) {
 		ob_end_clean();
+	}
+
+	if ( $ai_connect_has_crashed ) {
+		break;
 	}
 }
 

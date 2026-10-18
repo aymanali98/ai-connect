@@ -649,7 +649,10 @@ final class Dev {
 		Path_Guard::check_writable( $to, 'rename' );
 		self::assert_not_core( $from, 'rename' );
 		self::assert_not_core( $to, 'rename' );
-		Sandbox::assert_php_allowed( $to, 'rename' );
+		$is_restoring_disabled = ( substr( $from, -13 ) === '.php.disabled' && substr( $to, -4 ) === '.php' && substr( $from, 0, -9 ) === $to );
+		if ( ! $is_restoring_disabled ) {
+			Sandbox::assert_php_allowed( $to, 'rename' );
+		}
 
 		if ( ! file_exists( $from ) ) {
 			throw new Tool_Error( 'Source not found: ' . Path_Guard::relative( $from ) );
@@ -1085,7 +1088,8 @@ final class Dev {
 			return $sql;
 		}
 
-		$placeholders = preg_match_all( '/%[sdf]/', $sql );
+		$clean_sql    = Sql_Guard::strip_literals_and_comments( $sql );
+		$placeholders = preg_match_all( '/%[sdf]/', $clean_sql );
 		if ( $placeholders !== count( $params ) ) {
 			throw new Tool_Error(
 				'Parameter count mismatch.',
@@ -1163,17 +1167,22 @@ final class Dev {
 		$cap  = 256 * 1024;
 		$done = false;
 		while ( ! $done ) {
-			$read   = array();
-			$read[] = $pipes[1];
-			$read[] = $pipes[2];
-			$write  = null;
-			$except = null;
+			if ( Util::is_windows() ) {
+				usleep( 20000 );
+				$streams_to_read = array( $pipes[1], $pipes[2] );
+			} else {
+				$read   = array( $pipes[1], $pipes[2] );
+				$write  = null;
+				$except = null;
 
-			$ready = @stream_select( $read, $write, $except, 0, 200000 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
-			if ( false === $ready ) {
-				break;
+				$ready = @stream_select( $read, $write, $except, 0, 200000 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors
+				if ( false === $ready ) {
+					break;
+				}
+				$streams_to_read = $read;
 			}
-			foreach ( $read as $stream ) {
+
+			foreach ( $streams_to_read as $stream ) {
 				$chunk = fread( $stream, 8192 );
 				if ( false !== $chunk && '' !== $chunk ) {
 					if ( $stream === $pipes[1] ) {

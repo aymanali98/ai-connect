@@ -227,7 +227,13 @@ final class DB {
 		$log = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', self::log_table() ) );
 		if ( self::log_table() !== $log ) {
 			$legacy_log = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', self::legacy_log_table() ) );
-			return self::legacy_log_table() === $legacy_log;
+			if ( self::legacy_log_table() !== $legacy_log ) {
+				return false;
+			}
+		}
+		$jobs = $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', self::jobs_table() ) );
+		if ( self::jobs_table() !== $jobs ) {
+			return false;
 		}
 		return true;
 	}
